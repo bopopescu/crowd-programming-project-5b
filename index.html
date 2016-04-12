@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>Example Game Like Thing</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script type="text/javascript" src="mturk.js"></script>
+<script>
+var piecex = 0;
+var piecey = 0;
+var pieceWidth = 50;
+var pieceHeight = 50;
+var reward = 0;
+var count = 0;
+var playerLocation = 0;
+var lose = false;
+var time = 0;
+
+var game =
+  [[0,0,0,1,0,0],
+   [0,0,0,0,1,1],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [1,1,1,0,0,0],
+   [1,1,1,0,1,1],
+   [1,1,0,0,0,1],
+   [1,0,1,0,0,0],
+   [0,0,1,0,0,0],
+   [0,0,0,0,0,1],
+   [0,0,0,0,0,1],
+   [1,0,0,0,0,1],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0]];
+
+var board =
+  [[0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0],
+   [0,0,0,0,0,0]];
+
+// var boardHSize = board[0].length;
+var boardHSize = 6;
+console.log(boardHSize);
+// var boardVSize = board.length;
+var boardVSize = 6;
+console.log(boardVSize);
+
+var boardWidth = pieceWidth*boardHSize;
+var boardHeight = boardVSize*pieceHeight;
+
+$(document).ready(function() {
+  var gameboard = $("<div id='gameboard'></div>");
+  gameboard.css("width", boardWidth+"px");
+  gameboard.css("height", boardHeight+"px");
+  $(document.body).append(gameboard);
+
+  var score = $("<div id='score'></div>");
+  score.css("width", 200+"px");
+  score.css("height", 100+"px");
+  score.css("left", 1000+"px");
+  score.css("top", 500+"px");
+  score.text(reward);
+  $(document.body).append(score);
+
+  for(var i = 0; i < boardVSize; i++){
+    for(var j = 0; j < boardHSize; j++){
+      console.log("i "+i);
+      console.log("j "+j);
+      if (board[i][j] == 1){
+        var color = "blue";
+      } else {
+        var color = "black";  
+      }
+      console.log("block");
+      console.log(i);
+      console.log(j);
+      var blockX = pieceWidth*j;
+      var blockY = pieceHeight*i;
+      console.log(blockX);
+      console.log(blockY);
+      var block = $("<div class='block'></div>");
+      block.css("background-color", "black");
+      block.css("width", pieceWidth+"px");
+      block.css("height", pieceHeight+"px");
+      block.css("left", blockX+"px");
+      block.css("top", blockY+"px");
+      block.css("background-color", color);
+      $(gameboard).append(block);
+    }
+  }
+
+  var player = $("<div class='player'></div>");
+  player.css("width", pieceWidth+"px");
+  player.css("height", pieceHeight+"px");
+  player.css("left", 0+"px");
+  player.css("top", boardHeight-pieceHeight+"px");
+  player.css("background-color", "red");
+  $(gameboard).append(player);
+  $(document).keydown(function(e) {
+    if(e.keyCode==37) {
+      // left arrow clicked
+      piecex -= 25;
+    } else if(e.keyCode == 39) {
+      // right arrow clicked
+      piecex += 25;
+    }
+    if(piecex+pieceWidth > boardWidth){
+      piecex = 0;
+    } else if (piecex < 0) {
+      piecex = boardWidth - pieceWidth;
+    }
+    playerLocation = piecex/50;
+    // console.log(location);
+  
+    $(".player").css("left", piecex + "px");
+  });
+  var refresh = setInterval(function() {
+      $("#score").text("$ "+reward.toFixed(3));
+      count ++;
+
+
+      var nextRow = Math.floor(Math.random() * (game.length));
+      // console.log("next Row" + nextRow);
+      board.unshift(game[nextRow]);
+      if (board[boardVSize-1][Math.floor(playerLocation)] == 1){
+        console.log("game over"); 
+        lose = true;
+      }else if ((playerLocation%1 == 0.5) && (board[boardVSize-1][Math.floor(playerLocation)+1] == 1)){
+        console.log("game over"); 
+        lose = true;
+      }
+      if((lose == false) && (count != 0) && ((count % 2) == 0)){
+        reward = reward + 0.001;
+        time = count * 0.5;
+      }
+
+      if (reward == 2){
+        alert("Game Over!");
+      }
+
+      if (lose == true) {
+        alert("Game Over!");
+        clearInterval(refresh);
+      }
+      // $(".block").css("background-color", "black");
+      for(var i = 0; i < boardVSize; i++){
+        for(var j = 0; j < boardHSize; j++){
+          var index = i * boardHSize + j + 1;
+          var prevIndex = (i-1) * boardHSize + j + 1;
+          var current = $("#gameboard .block:nth-child(" + index + ")");
+          // var prev = $("#gameboard .block:nth-child(" + prevIndex + ")");
+          // var next = $("#gameboard .block:nth-child(" + nextIndex + ")");
+          // console.log(current.css("background-color"));
+        // if (current.css("color") == "blue"){
+        //   current.css("background-color", "black");
+        // }
+          if (board[i][j] == 1){
+            // console.log("current index: "+ index);
+          // console.log($("#gameboard .block:nth-child(" + index + ")"));
+          // current.css("top", current.css("top")+pieceHeight);
+            // prev.css("background-color", "black");
+            current.css("background-color", "blue");
+            // next.css("background-color", "red");
+          } else {
+            current.css("background-color", "black");
+          }
+          if ((i == (boardVSize-1)) && (j == (boardHSize-1))) {
+            // console.log("this is stupid");
+            board[5] = [0,0,0,0,0,0];
+          }
+        }
+      }
+  }, 500);
+})
+</script>
+<style>
+#gameboard {
+  background-color: gray;
+  /*width: 300px;*/
+  /*height: 300px;*/
+  position: relative;
+}
+.player {
+  /*background-color: #AAF;*/
+  /*width: 50px;*/
+  /*height: 50px;*/
+  position: absolute;
+  /*left: 0px;*/
+  /*top: 0px;*/
+}
+
+.block {
+  /*background-color: #AAF;*/
+  /*width: 50px;*/
+  /*height: 50px;*/
+  position: absolute;
+  /*left: 0px;*/
+  /*top: 0px;*/
+}
+
+.score{
+  position: fixed;
+}
+</style>
+</head>
+<body>
+</body>
+</html>
